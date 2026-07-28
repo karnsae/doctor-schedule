@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ระบบเช็คตารางออกตรวจและวันนัดของแพทย์ประจำบ้านอายุรศาสตร์ สวยงามและใช้งานง่าย">
+  <title>Doctor Duty Schedule Checker</title>
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="logo-icon">🏥</div>
+        <div>
+          <h1>ระบบเช็คตารางออกตรวจแพทย์</h1>
+          <p class="subtitle">แพทย์ประจำบ้านสาขาอายุรศาสตร์ ชั้นปีที่ 1-3 ปีการฝึกอบรม 2569</p>
+        </div>
+      </div>
+      
+      <!-- Doctor Selector & Main Filter -->
+      <div class="header-actions">
+        <div class="filter-box">
+          <label for="doctor-select">เลือกแพทย์:</label>
+          <div class="custom-select-wrapper">
+            <select id="doctor-select" class="doctor-select-custom">
+              <!-- Populated dynamically via JS -->
+            </select>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT LAYOUT -->
+    <div class="main-layout">
+      
+      <!-- LEFT COLUMN: STATS & SIMULATOR -->
+      <aside class="sidebar-left">
+        <!-- Stats Card -->
+        <div class="glass-card stats-card">
+          <div class="card-header">
+            <h3>📊 ข้อมูลการออกตรวจ</h3>
+          </div>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">นัดถัดไป</span>
+              <span class="stat-value highlight" id="stat-next-date">-</span>
+              <span class="stat-sub" id="stat-next-time">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">อีกกี่วัน</span>
+              <span class="stat-value" id="stat-countdown">-</span>
+              <span class="stat-sub" id="stat-countdown-unit">วันจะถึงวันนัด</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">ออกตรวจเดือนนี้</span>
+              <span class="stat-value" id="stat-total-shifts">0</span>
+              <span class="stat-sub">ครั้ง</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Date Simulator Widget -->
+        <div class="glass-card simulator-card">
+          <div class="card-header">
+            <h3>🕒 จำลองวันปัจจุบัน (ทดสอบ)</h3>
+          </div>
+          <div class="sim-controls">
+            <input type="date" id="sim-date-picker" class="form-control">
+            <button id="btn-reset-date" class="btn btn-secondary btn-sm"> Reset เป็นวันนี้ </button>
+          </div>
+          <p class="sim-note">ปรับวันเพื่อเช็คการนับถอยหลัง ( countdown ) ของการออกตรวจ</p>
+        </div>
+      </aside>
+
+      <!-- CENTER: MONTHLY CALENDAR -->
+      <main class="calendar-section">
+        <div class="glass-card calendar-card">
+          <div class="calendar-header">
+            <button id="btn-prev-month" class="btn-arrow" aria-label="เดือนก่อนหน้า">❮</button>
+            <h2 id="calendar-title" class="calendar-title">กรกฎาคม 2569</h2>
+            <button id="btn-next-month" class="btn-arrow" aria-label="เดือนถัดไป">❯</button>
+          </div>
+          
+          <!-- Calendar Grid -->
+          <div class="calendar-grid-container">
+            <div class="weekdays-grid">
+              <div>อา.</div>
+              <div>จ.</div>
+              <div>อ.</div>
+              <div>พ.</div>
+              <div>พฤ.</div>
+              <div>ศ.</div>
+              <div>ส.</div>
+            </div>
+            <div id="calendar-days" class="days-grid">
+              <!-- Populated dynamically via JS -->
+            </div>
+          </div>
+          
+          <!-- Calendar Legend -->
+          <div class="calendar-legend">
+            <div class="legend-item"><span class="legend-dot on-duty"></span>มีออกตรวจ</div>
+            <div class="legend-item"><span class="legend-dot today"></span>วันปัจจุบันที่จำลอง</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT COLUMN: UPCOMING SHIFTS LIST -->
+      <aside class="sidebar-right">
+        <div class="glass-card shifts-list-card">
+          <div class="card-header">
+            <h3>📅 ตารางตรวจที่กำลังจะถึง</h3>
+          </div>
+          <div id="upcoming-shifts-container" class="upcoming-shifts-list">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+      </aside>
+
+    </div>
+
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-overlay" id="detail-modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 id="modal-date-title">ตารางการออกตรวจวันที่ -</h2>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="block-info" id="modal-block-name">ช่วงเวลาตารางเวร: -</p>
+        
+        <div class="modal-slots-container" id="modal-slots">
+          <!-- Slots like 8.00-11.00 will be added dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
