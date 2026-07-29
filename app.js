@@ -16,8 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
     "อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."
   ];
 
-  // Starting Simulated Date (From Metadata: 2026-07-28)
-  const INITIAL_REAL_DATE = "2026-07-28"; 
+  // Starting Simulated Date (From Metadata: 2026-07-29)
+  const INITIAL_REAL_DATE = "2026-07-29"; 
   let currentSimulatedDate = parseLocalDate(INITIAL_REAL_DATE);
 
   // Active Calendar Month (Initial view is July 2026 - month index 6)
@@ -88,6 +88,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Get active schedule for a specific date and day of the week
   function getDutyOnDate(date, doctorName) {
+    const dateStr = formatLocalDate(date);
+    // If it's a Thai public holiday, no one works!
+    if (window.HOLIDAYS_2026 && window.HOLIDAYS_2026[dateStr]) {
+      return [];
+    }
+
     const block = getBlockForDate(date);
     if (!block) return [];
 
@@ -195,6 +201,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const dateStr = formatLocalDate(thisDate);
       const dayOfWeek = thisDate.getDay();
       
+      // Class: holiday
+      let isHoliday = false;
+      let holidayName = "";
+      if (window.HOLIDAYS_2026 && window.HOLIDAYS_2026[dateStr]) {
+        isHoliday = true;
+        holidayName = window.HOLIDAYS_2026[dateStr];
+        dayCell.classList.add("is-holiday");
+        dayCell.title = holidayName;
+      }
+      
       // Class: weekend
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         dayCell.classList.add("weekend");
@@ -207,6 +223,9 @@ document.addEventListener("DOMContentLoaded", () => {
       
       // Day Number Label
       dayCell.innerHTML = `<span class="day-number">${day}</span>`;
+      if (isHoliday) {
+        dayCell.innerHTML += `<span class="holiday-label" title="${holidayName}">วันหยุด</span>`;
+      }
       
       // Check duty
       const duties = getDutyOnDate(thisDate, selectedDoctor);
@@ -365,6 +384,20 @@ document.addEventListener("DOMContentLoaded", () => {
   function openDayDetail(date) {
     const formattedTitle = `${THAI_DAYS[date.getDay()]}ที่ ${date.getDate()} ${THAI_MONTHS[date.getMonth()]} พ.ศ. ${date.getFullYear() + 543}`;
     modalDateTitle.textContent = `ตารางเวร: ${formattedTitle}`;
+    
+    const dateStr = formatLocalDate(date);
+    
+    // Check if it's a Thai public holiday first
+    if (window.HOLIDAYS_2026 && window.HOLIDAYS_2026[dateStr]) {
+      modalBlockName.textContent = `วันหยุดราชการ: ${window.HOLIDAYS_2026[dateStr]}`;
+      modalSlots.innerHTML = `
+        <div style="text-align:center; padding:2rem; color:var(--accent-amber); font-weight: 500;">
+          🇹🇭 วันหยุดราชการไทย (ไม่มีตารางออกตรวจปกติ / OPD ปิดทำการ)
+        </div>
+      `;
+      detailModal.classList.add("open");
+      return;
+    }
     
     const block = getBlockForDate(date);
     if (!block) {

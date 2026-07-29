@@ -135,5 +135,14 @@ const SCHEDULE_BLOCKS = [
   }
 ];
 
+// Thai Public Holidays (July - Sept 2569 / 2026)
+const HOLIDAYS_2026 = {
+  "2026-07-28": "วันเฉลิมพระชนมพรรษาพระบาทสมเด็จพระเจ้าอยู่หัว (ร.10)",
+  "2026-07-29": "วันอาสาฬหบูชา",
+  "2026-07-30": "วันเข้าพรรษา",
+  "2026-08-12": "วันเฉลิมพระชนมพรรษาสมเด็จพระบรมราชชนนีพันปีหลวง / วันแม่แห่งชาติ"
+};
+
 // Export to window object for browser access
 window.SCHEDULE_BLOCKS = SCHEDULE_BLOCKS;
+window.HOLIDAYS_2026 = HOLIDAYS_2026;
