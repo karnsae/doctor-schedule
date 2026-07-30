@@ -216,6 +216,159 @@ body {
   gap: 1.5rem;
 }
 
+/* Doctor Profile Card Styling */
+.profile-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.profile-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.profile-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.profile-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.profile-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.highlight-year {
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-size: 0.8rem;
+}
+
+.highlight-phone {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+.highlight-phone:hover {
+  text-shadow: 0 0 8px rgba(6, 182, 212, 0.5);
+  color: #fff;
+}
+
+.highlight-rotation {
+  color: var(--accent-emerald);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 8px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.85rem;
+}
+
+.highlight-vacation {
+  color: #c084fc;
+  background: rgba(139, 92, 246, 0.10);
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  font-size: 0.8rem;
+}
+
+/* Ward Card Styling */
+.ward-doctors-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.ward-doctor-item {
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.ward-doctor-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateX(3px);
+}
+
+.ward-doctor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ward-doctor-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ward-year-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.ward-year-badge.r1 {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+}
+
+.ward-year-badge.r2 {
+  background: rgba(139, 92, 246, 0.12);
+  color: #c084fc;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+.ward-year-badge.r3 {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--accent-emerald);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.ward-doctor-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.ward-phone-link {
+  color: var(--accent-cyan);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ward-phone-link:hover {
+  text-shadow: 0 0 6px rgba(6, 182, 212, 0.4);
+}
+
 .stats-grid {
   display: flex;
   flex-direction: column;
@@ -477,6 +630,35 @@ body {
   pointer-events: none;
 }
 
+/* Vacation Cell */
+.day-cell.is-vacation {
+  background: rgba(139, 92, 246, 0.04);
+  border: 1px dashed rgba(139, 92, 246, 0.35);
+}
+
+.day-cell.is-vacation:hover {
+  border-color: #c084fc;
+}
+
+.day-cell.is-vacation .day-number {
+  color: #c084fc;
+  font-weight: 600;
+}
+
+.vacation-label {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #c084fc;
+  background: rgba(139, 92, 246, 0.08);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  pointer-events: none;
+}
+
 /* On duty Cell */
 .day-cell.on-duty {
   background: rgba(99, 102, 241, 0.1);
@@ -567,6 +749,11 @@ body {
 .legend-dot.holiday {
   background: rgba(245, 158, 11, 0.15);
   border: 1px dashed var(--accent-amber);
+}
+
+.legend-dot.vacation {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px dashed #c084fc;
 }
 
 /* Sidebar Right: Shifts List */

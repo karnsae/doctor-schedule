@@ -69,6 +69,39 @@
           </div>
         </div>
 
+        <!-- Doctor Profile Card -->
+        <div class="glass-card profile-card" id="profile-card">
+          <div class="card-header">
+            <h3>👤 ข้อมูลแพทย์ & การขึ้นวอร์ด</h3>
+          </div>
+          <div class="profile-details">
+            <div class="profile-row">
+              <span class="profile-label">ชื่อ-สกุล</span>
+              <span class="profile-value" id="profile-fullname">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">ระดับชั้นปี</span>
+              <span class="profile-value highlight-year" id="profile-year">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">ชื่อเล่น</span>
+              <span class="profile-value" id="profile-nickname">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">เบอร์โทรศัพท์</span>
+              <span class="profile-value highlight-phone" id="profile-phone">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label" id="profile-rotation-label">การขึ้นวอร์ด (ช่วงนี้)</span>
+              <span class="profile-value highlight-rotation" id="profile-rotation">-</span>
+            </div>
+            <div class="profile-row">
+              <span class="profile-label">วันลาพักร้อน</span>
+              <span class="profile-value highlight-vacation" id="profile-vacation">-</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Date Simulator Widget -->
         <div class="glass-card simulator-card">
           <div class="card-header">
@@ -112,6 +145,7 @@
             <div class="legend-item"><span class="legend-dot on-duty"></span>มีออกตรวจ</div>
             <div class="legend-item"><span class="legend-dot today"></span>วันปัจจุบันที่จำลอง</div>
             <div class="legend-item"><span class="legend-dot holiday"></span>วันหยุดราชการ</div>
+            <div class="legend-item"><span class="legend-dot vacation"></span>วันลาพักร้อน</div>
           </div>
         </div>
       </main>
@@ -124,6 +158,26 @@
           </div>
           <div id="upcoming-shifts-container" class="upcoming-shifts-list">
             <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Ward Members Card -->
+        <div class="glass-card ward-card" id="ward-card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h3>🏥 แพทย์ประจำวอร์ด/หน่วย (ช่วงนี้)</h3>
+          </div>
+          <div class="ward-controls" style="margin-bottom: 1rem;">
+            <div class="custom-select-wrapper">
+              <select id="ward-select" class="form-control" style="width: 100%; padding-right: 2rem;">
+                <option value="">-- เลือกวอร์ด/หน่วยงาน --</option>
+                <!-- Populated dynamically via JS -->
+              </select>
+            </div>
+          </div>
+          <div id="ward-doctors-container" class="ward-doctors-container">
+            <div class="no-shifts-placeholder" style="padding: 1.5rem 0; text-align: center;">
+              <span>🏥 เลือกวอร์ด/หน่วยงานด้านบนเพื่อดูรายชื่อแพทย์</span>
+            </div>
           </div>
         </div>
       </aside>

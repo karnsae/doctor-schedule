@@ -134,9 +134,67 @@ document.addEventListener("DOMContentLoaded", () => {
     return duties.sort((a, b) => a.date - b.date);
   }
 
+  // Sort key helper: strips นพ. and พญ.
+  function getSortKey(name) {
+    return name.replace(/^(นพ\.|พญ\.)\s*/, "");
+  }
+
+  // Check if a doctor is on vacation on a specific date
+  function getDoctorVacation(docName, date) {
+    if (!window.RESIDENT_VACATIONS || !window.RESIDENT_VACATIONS[docName]) {
+      return null;
+    }
+    const vac = window.RESIDENT_VACATIONS[docName];
+    if (!vac.start || !vac.end) return null;
+    
+    const d = getMidnightDate(date);
+    const start = getMidnightDate(parseLocalDate(vac.start));
+    const end = getMidnightDate(parseLocalDate(vac.end));
+    
+    if (d.getTime() >= start.getTime() && d.getTime() <= end.getTime()) {
+      return vac;
+    }
+    return null;
+  }
+
+  // Format vacation range for Thai UI
+  function formatThaiVacationRange(vac) {
+    if (!vac || !vac.start || !vac.end) return "ไม่มีวันลาพักร้อน";
+    
+    const startDate = new Date(vac.start);
+    const endDate = new Date(vac.end);
+    
+    const startDay = startDate.getDate();
+    const startMonth = THAI_MONTHS[startDate.getMonth()];
+    const startYear = startDate.getFullYear() + 543;
+    
+    const endDay = endDate.getDate();
+    const endMonth = THAI_MONTHS[endDate.getMonth()];
+    const endYear = endDate.getFullYear() + 543;
+    
+    // Same year
+    if (startYear === endYear) {
+      // Same month
+      if (startMonth === endMonth) {
+        return `${startDay} - ${endDay} ${startMonth} ${startYear.toString().slice(-2)}`;
+      }
+      return `${startDay} ${startMonth} - ${endDay} ${endMonth} ${startYear.toString().slice(-2)}`;
+    }
+    return `${startDay} ${startMonth} ${startYear.toString().slice(-2)} - ${endDay} ${endMonth} ${endYear.toString().slice(-2)}`;
+  }
+
   // Initialize unique doctors list
   function initDoctorsList() {
     const doctorsSet = new Set();
+    
+    // Add all doctors from contact directory first
+    if (window.RESIDENT_CONTACTS) {
+      Object.keys(window.RESIDENT_CONTACTS).forEach(name => {
+        if (name.trim()) doctorsSet.add(name.trim());
+      });
+    }
+
+    // Add any remaining doctors from schedule blocks as fallback
     window.SCHEDULE_BLOCKS.forEach(block => {
       Object.keys(block.schedule).forEach(day => {
         block.schedule[day].forEach(slot => {
@@ -147,8 +205,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
     
-    // Sort alphabetically (Thai order)
-    allDoctorsList = Array.from(doctorsSet).sort((a, b) => a.localeCompare(b, 'th'));
+    // Sort alphabetically (Thai order) ignoring นพ. and พญ. prefixes
+    allDoctorsList = Array.from(doctorsSet).sort((a, b) => {
+      const keyA = getSortKey(a);
+      const keyB = getSortKey(b);
+      return keyA.localeCompare(keyB, 'th');
+    });
     
     // Populate select element
     doctorSelect.innerHTML = "";
@@ -211,6 +273,13 @@ document.addEventListener("DOMContentLoaded", () => {
         dayCell.title = holidayName;
       }
       
+      // Check if doctor is on vacation this day
+      let isVacation = false;
+      if (getDoctorVacation(selectedDoctor, thisDate)) {
+        isVacation = true;
+        dayCell.classList.add("is-vacation");
+      }
+      
       // Class: weekend
       if (dayOfWeek === 0 || dayOfWeek === 6) {
         dayCell.classList.add("weekend");
@@ -225,10 +294,12 @@ document.addEventListener("DOMContentLoaded", () => {
       dayCell.innerHTML = `<span class="day-number">${day}</span>`;
       if (isHoliday) {
         dayCell.innerHTML += `<span class="holiday-label" title="${holidayName}">วันหยุด</span>`;
+      } else if (isVacation) {
+        dayCell.innerHTML += `<span class="vacation-label">ลาพักร้อน</span>`;
       }
       
-      // Check duty
-      const duties = getDutyOnDate(thisDate, selectedDoctor);
+      // Check duty (only if not on vacation)
+      const duties = isVacation ? [] : getDutyOnDate(thisDate, selectedDoctor);
       if (duties.length > 0) {
         dayCell.classList.add("on-duty");
         
@@ -272,13 +343,14 @@ document.addEventListener("DOMContentLoaded", () => {
       calendarDaysContainer.appendChild(dayCell);
     }
 
-    // Limit Nav Buttons based on data scope (July, Aug, Sept 2026)
-    // July 2026 = Index 6. Sept 2026 = Index 8.
-    btnPrevMonth.style.opacity = (activeMonth <= 6 && activeYear === 2026) ? "0.3" : "1";
-    btnPrevMonth.style.pointerEvents = (activeMonth <= 6 && activeYear === 2026) ? "none" : "all";
+    // Limit Nav Buttons based on academic year scope (July 2026 to June 2027)
+    const isMinMonth = (activeMonth === 6 && activeYear === 2026);
+    btnPrevMonth.style.opacity = isMinMonth ? "0.3" : "1";
+    btnPrevMonth.style.pointerEvents = isMinMonth ? "none" : "all";
     
-    btnNextMonth.style.opacity = (activeMonth >= 8 && activeYear === 2026) ? "0.3" : "1";
-    btnNextMonth.style.pointerEvents = (activeMonth >= 8 && activeYear === 2026) ? "none" : "all";
+    const isMaxMonth = (activeMonth === 5 && activeYear === 2027);
+    btnNextMonth.style.opacity = isMaxMonth ? "0.3" : "1";
+    btnNextMonth.style.pointerEvents = isMaxMonth ? "none" : "all";
   }
 
   // Render Sidebar Panels: Stats and Upcoming Shifts
@@ -378,6 +450,77 @@ document.addEventListener("DOMContentLoaded", () => {
         upcomingShiftsContainer.appendChild(item);
       });
     }
+    
+    // Update doctor contact details and active ward/unit rotations
+    updateDoctorProfile();
+  }
+
+  // Update Doctor Profile Details (From CSV data)
+  function updateDoctorProfile() {
+    const profileFullname = document.getElementById("profile-fullname");
+    const profileYear = document.getElementById("profile-year");
+    const profileNickname = document.getElementById("profile-nickname");
+    const profilePhone = document.getElementById("profile-phone");
+    const profileRotation = document.getElementById("profile-rotation");
+    const profileVacation = document.getElementById("profile-vacation");
+    
+    // Check if contacts data exists
+    if (!window.RESIDENT_CONTACTS) return;
+    
+    const contact = window.RESIDENT_CONTACTS[selectedDoctor];
+    if (contact) {
+      profileFullname.textContent = contact.fullName || selectedDoctor;
+      
+      // Thai residency year translation
+      let yearText = contact.year;
+      if (contact.year === "R1") yearText = "แพทย์ประจำบ้านชั้นปีที่ 1 (R1)";
+      else if (contact.year === "R2") yearText = "แพทย์ประจำบ้านชั้นปีที่ 2 (R2)";
+      else if (contact.year === "R3") yearText = "แพทย์ประจำบ้านชั้นปีที่ 3 (R3)";
+      profileYear.textContent = yearText;
+      
+      profileNickname.textContent = contact.nickname ? contact.nickname : "-";
+      
+      // Phone number formatting
+      if (contact.phone && contact.phone.trim()) {
+        profilePhone.innerHTML = `<a href="tel:${contact.phone}" class="highlight-phone">📞 ${contact.phone}</a>`;
+      } else {
+        profilePhone.textContent = "-";
+      }
+      
+      // Vacation leave range formatting
+      const vac = window.RESIDENT_VACATIONS ? window.RESIDENT_VACATIONS[selectedDoctor] : null;
+      profileVacation.textContent = formatThaiVacationRange(vac);
+    } else {
+      // Default fallback if doctor not found in contact list
+      profileFullname.textContent = selectedDoctor;
+      profileYear.textContent = "-";
+      profileNickname.textContent = "-";
+      profilePhone.textContent = "-";
+      profileVacation.textContent = "-";
+    }
+    
+    // Check ward/unit rotation for the current simulated date
+    const block = getBlockForDate(currentSimulatedDate);
+    if (block && window.RESIDENT_ROTATIONS && window.RESIDENT_ROTATIONS[block.id]) {
+      const rotation = window.RESIDENT_ROTATIONS[block.id][selectedDoctor];
+      if (rotation) {
+        // Translation helper
+        let formattedRotation = rotation;
+        if (rotation.startsWith("Ward: ")) {
+          formattedRotation = "วอร์ด " + rotation.slice(6);
+        } else if (rotation.startsWith("Unit: ")) {
+          formattedRotation = "หน่วย " + rotation.slice(6);
+        }
+        profileRotation.textContent = formattedRotation;
+        profileRotation.className = "profile-value highlight-rotation";
+      } else {
+        profileRotation.textContent = "ไม่มีเวรขึ้นวอร์ดช่วงนี้";
+        profileRotation.className = "profile-value";
+      }
+    } else {
+      profileRotation.textContent = "-";
+      profileRotation.className = "profile-value";
+    }
   }
 
   // --- Modal Day details panel ---
@@ -387,6 +530,19 @@ document.addEventListener("DOMContentLoaded", () => {
     
     const dateStr = formatLocalDate(date);
     
+    // Check if doctor is on vacation on this day
+    const vacation = getDoctorVacation(selectedDoctor, date);
+    if (vacation) {
+      modalBlockName.textContent = "วันลาพักร้อนของแพทย์";
+      modalSlots.innerHTML = `
+        <div style="text-align:center; padding:2rem; color:#c084fc; font-weight: 500;">
+          🏖️ ${selectedDoctor} ลาพักร้อน (ไม่มีตารางออกตรวจปกติช่วงนี้)
+        </div>
+      `;
+      detailModal.classList.add("open");
+      return;
+    }
+
     // Check if it's a Thai public holiday first
     if (window.HOLIDAYS_2026 && window.HOLIDAYS_2026[dateStr]) {
       modalBlockName.textContent = `วันหยุดราชการ: ${window.HOLIDAYS_2026[dateStr]}`;
@@ -492,21 +648,39 @@ document.addEventListener("DOMContentLoaded", () => {
     updateDoctorInfo();
   });
 
+  // Ward Selector Change
+  const wardSelect = document.getElementById("ward-select");
+  wardSelect.addEventListener("change", () => {
+    updateWardDoctors();
+  });
+
   // Calendar navigation Month Previous/Next
   btnPrevMonth.addEventListener("click", () => {
-    if (activeMonth > 6) { // Block begins in July (6)
-      activeMonth--;
-      renderCalendar();
-      updateDoctorInfo();
+    if (activeYear === 2026 && activeMonth === 6) {
+      return;
     }
+    activeMonth--;
+    if (activeMonth < 0) {
+      activeMonth = 11;
+      activeYear--;
+    }
+    renderCalendar();
+    updateDoctorInfo();
+    updateWardDoctors();
   });
 
   btnNextMonth.addEventListener("click", () => {
-    if (activeMonth < 8) { // Block ends in September (8)
-      activeMonth++;
-      renderCalendar();
-      updateDoctorInfo();
+    if (activeYear === 2027 && activeMonth === 5) {
+      return;
     }
+    activeMonth++;
+    if (activeMonth > 11) {
+      activeMonth = 0;
+      activeYear++;
+    }
+    renderCalendar();
+    updateDoctorInfo();
+    updateWardDoctors();
   });
 
   // Simulator date change
@@ -515,6 +689,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentSimulatedDate = parseLocalDate(e.target.value);
       renderCalendar();
       updateDoctorInfo();
+      updateWardDoctors();
     }
   });
 
@@ -529,7 +704,169 @@ document.addEventListener("DOMContentLoaded", () => {
     
     renderCalendar();
     updateDoctorInfo();
+    updateWardDoctors();
   });
+
+  // Collect and initialize all unique Wards and Units across all blocks
+  function initWardsList() {
+    const uniqueRotations = new Set();
+    
+    if (window.RESIDENT_ROTATIONS) {
+      Object.keys(window.RESIDENT_ROTATIONS).forEach(blockId => {
+        Object.keys(window.RESIDENT_ROTATIONS[blockId]).forEach(docName => {
+          const rot = window.RESIDENT_ROTATIONS[blockId][docName];
+          if (rot) {
+            uniqueRotations.add(rot);
+          }
+        });
+      });
+    }
+    
+    // Sort rotations: Wards first, then Units, alphabetically in Thai
+    const sortedRotations = Array.from(uniqueRotations).sort((a, b) => {
+      const isWardA = a.startsWith("Ward:");
+      const isWardB = b.startsWith("Ward:");
+      
+      if (isWardA && !isWardB) return -1;
+      if (!isWardA && isWardB) return 1;
+      
+      return a.localeCompare(b, 'th');
+    });
+    
+    // Populate select
+    wardSelect.innerHTML = '<option value="">-- เลือกวอร์ด/หน่วยงาน --</option>';
+    sortedRotations.forEach(rot => {
+      const option = document.createElement("option");
+      option.value = rot;
+      
+      // Formatting display text
+      let displayText = rot;
+      if (rot.startsWith("Ward: ")) {
+        displayText = "วอร์ด " + rot.slice(6);
+      } else if (rot.startsWith("Unit: ")) {
+        displayText = "หน่วย " + rot.slice(6);
+      }
+      
+      option.textContent = displayText;
+      wardSelect.appendChild(option);
+    });
+  }
+
+  // Update list of doctors rotating in the selected ward/unit during the active block
+  function updateWardDoctors() {
+    const wardDoctorsContainer = document.getElementById("ward-doctors-container");
+    const selectedRot = wardSelect.value;
+    
+    if (!selectedRot) {
+      wardDoctorsContainer.innerHTML = `
+        <div class="no-shifts-placeholder" style="padding: 1.5rem 0; text-align: center;">
+          <span>🏥 เลือกวอร์ด/หน่วยงานด้านบนเพื่อดูรายชื่อแพทย์</span>
+        </div>
+      `;
+      return;
+    }
+    
+    const block = getBlockForDate(currentSimulatedDate);
+    if (!block) {
+      wardDoctorsContainer.innerHTML = `
+        <div class="no-shifts-placeholder" style="padding: 1.5rem 0; text-align: center;">
+          <span>ไม่อยู่ในช่วงระยะเวลาตารางเวร</span>
+        </div>
+      `;
+      return;
+    }
+    
+    // Find all doctors rotating in this ward/unit in this block
+    const blockRotations = window.RESIDENT_ROTATIONS[block.id] || {};
+    const doctorsInWard = [];
+    
+    Object.keys(blockRotations).forEach(docName => {
+      if (blockRotations[docName] === selectedRot) {
+        // Look up details from contact list
+        const contact = window.RESIDENT_CONTACTS[docName] || {
+          fullName: docName,
+          nickname: "-",
+          phone: "",
+          year: "R1" // fallback
+        };
+        doctorsInWard.push({
+          displayName: docName,
+          ...contact
+        });
+      }
+    });
+    
+    if (doctorsInWard.length === 0) {
+      let displayName = selectedRot;
+      if (selectedRot.startsWith("Ward: ")) displayName = "วอร์ด " + selectedRot.slice(6);
+      else if (selectedRot.startsWith("Unit: ")) displayName = "หน่วย " + selectedRot.slice(6);
+      
+      wardDoctorsContainer.innerHTML = `
+        <div class="no-shifts-placeholder" style="padding: 1.5rem 0; text-align: center;">
+          <span>ไม่มีแพทย์เวียนเข้า ${displayName} ในช่วงเวลานี้</span>
+          <span style="font-size:0.75rem; margin-top:0.25rem;">(${block.name})</span>
+        </div>
+      `;
+      return;
+    }
+    
+    // Sort doctors by Resident Year descending (R3 -> R2 -> R1) then name
+    doctorsInWard.sort((a, b) => {
+      const yearOrder = { "R3": 3, "R2": 2, "R1": 1 };
+      const orderA = yearOrder[a.year] || 1;
+      const orderB = yearOrder[b.year] || 1;
+      
+      if (orderA !== orderB) {
+        return orderB - orderA; // R3 first
+      }
+      
+      const keyA = getSortKey(a.displayName);
+      const keyB = getSortKey(b.displayName);
+      return keyA.localeCompare(keyB, 'th');
+    });
+    
+    // Render list
+    wardDoctorsContainer.innerHTML = "";
+    doctorsInWard.forEach(doc => {
+      const item = document.createElement("div");
+      item.className = "ward-doctor-item";
+      
+      const badgeClass = doc.year.toLowerCase(); // r1, r2, r3
+      const nameWithTitle = doc.fullName.includes("นพ.") || doc.fullName.includes("พญ.") ? doc.fullName : doc.displayName;
+      const nickText = doc.nickname ? `ชื่อเล่น: ${doc.nickname}` : "ชื่อเล่น: -";
+      
+      const phoneText = doc.phone ? `<a href="tel:${doc.phone}" class="ward-phone-link">📞 ${doc.phone}</a>` : "เบอร์โทร: -";
+      
+      item.innerHTML = `
+        <div class="ward-doctor-header">
+          <span class="ward-doctor-name">${nameWithTitle}</span>
+          <span class="ward-year-badge ${badgeClass}">${doc.year}</span>
+        </div>
+        <div class="ward-doctor-meta">
+          <span>${nickText}</span>
+          <span>${phoneText}</span>
+        </div>
+      `;
+      
+      // Stop propagation of click on the phone link so clicking phone does not trigger selecting doctor
+      const phoneLink = item.querySelector(".ward-phone-link");
+      if (phoneLink) {
+        phoneLink.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+      }
+      
+      // Click handler: select this doctor
+      item.addEventListener("click", () => {
+        selectedDoctor = doc.displayName;
+        doctorSelect.value = selectedDoctor;
+        renderCalendar();
+        updateDoctorInfo();
+      });
+      
+      wardDoctorsContainer.appendChild(item);
+    });
+  }
 
   // --- Initializing App ---
   
@@ -539,7 +876,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Parse schedules & populate doctors
   initDoctorsList();
   
+  // Parse ward/unit list
+  initWardsList();
+  
   // Draw layout
   renderCalendar();
   updateDoctorInfo();
+  updateWardDoctors();
 });
