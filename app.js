@@ -716,7 +716,12 @@ document.addEventListener("DOMContentLoaded", () => {
         Object.keys(window.RESIDENT_ROTATIONS[blockId]).forEach(docName => {
           const rot = window.RESIDENT_ROTATIONS[blockId][docName];
           if (rot) {
-            uniqueRotations.add(rot);
+            // Exclude elective rotations containing PMK, RA, CMU, CU, TU from the dropdown
+            const excludeKeywords = ["PMK", "RA", "CMU", "CU", "TU"];
+            const isElective = excludeKeywords.some(keyword => rot.includes(keyword));
+            if (!isElective) {
+              uniqueRotations.add(rot);
+            }
           }
         });
       });
