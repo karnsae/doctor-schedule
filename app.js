@@ -108,11 +108,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return daySchedule.filter(slot => slot.doctors.includes(doctorName));
   }
 
-  // Generate a list of all duty days for a doctor in the range of the schedule (July 1 - Sept 26, 2026)
+  // Generate a list of all duty days for a doctor in the range of the schedule (dynamically scans all blocks)
   function getDoctorAllDuties(doctorName) {
     const duties = [];
-    const startDate = parseLocalDate("2026-07-01");
-    const endDate = parseLocalDate("2026-09-26");
+    if (!window.SCHEDULE_BLOCKS || window.SCHEDULE_BLOCKS.length === 0) return [];
+    
+    // Dynamically find start and end dates from all blocks
+    const startDates = window.SCHEDULE_BLOCKS.map(b => b.startDate);
+    const endDates = window.SCHEDULE_BLOCKS.map(b => b.endDate);
+    const minStart = startDates.reduce((min, d) => d < min ? d : min, startDates[0]);
+    const maxEnd = endDates.reduce((max, d) => d > max ? d : max, endDates[0]);
+    
+    const startDate = parseLocalDate(minStart);
+    const endDate = parseLocalDate(maxEnd);
     
     // Loop through each day
     let loopDate = new Date(startDate);
@@ -120,10 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const slots = getDutyOnDate(loopDate, doctorName);
       if (slots.length > 0) {
         slots.forEach(slot => {
+          const block = getBlockForDate(loopDate);
           duties.push({
             date: new Date(loopDate),
             time: slot.time,
-            blockName: getBlockForDate(loopDate).name
+            blockName: block ? block.name : ""
           });
         });
       }
