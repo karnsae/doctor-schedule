@@ -430,7 +430,7 @@ const RESIDENT_CONTACTS = {
   },
   "พญ.สุธิตา": {
     "fullName": "พญ.สุธิตา พูนประพันธ์",
-    "nickname": "อุ๋ม",
+    "nickname": "อุ้ม",
     "phone": "098-272-9363",
     "year": "R3"
   },
