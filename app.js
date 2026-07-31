@@ -16,13 +16,35 @@ document.addEventListener("DOMContentLoaded", () => {
     "อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."
   ];
 
-  // Starting Simulated Date (From Metadata: 2026-07-29)
-  const INITIAL_REAL_DATE = "2026-07-29"; 
+  // Get today's real date in YYYY-MM-DD format
+  const getTodayDateString = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const INITIAL_REAL_DATE = getTodayDateString();
   let currentSimulatedDate = parseLocalDate(INITIAL_REAL_DATE);
 
-  // Active Calendar Month (Initial view is July 2026 - month index 6)
-  let activeMonth = 6; 
-  let activeYear = 2026;
+  // Active Calendar Month (Initial view is today's month/year, clamped to July 2026 - June 2027 if outside range)
+  const todayDate = new Date();
+  let activeMonth = todayDate.getMonth();
+  let activeYear = todayDate.getFullYear();
+
+  // Clamp initial calendar month/year to July 2026 - June 2027 range if outside
+  const totalMonths = activeYear * 12 + activeMonth;
+  const minMonths = 2026 * 12 + 6; // July 2026
+  const maxMonths = 2027 * 12 + 5; // June 2027
+  
+  if (totalMonths < minMonths) {
+    activeMonth = 6;
+    activeYear = 2026;
+  } else if (totalMonths > maxMonths) {
+    activeMonth = 5;
+    activeYear = 2027;
+  }
   
   // Selected Doctor
   let selectedDoctor = "";
