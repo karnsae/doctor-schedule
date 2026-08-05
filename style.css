@@ -2,21 +2,22 @@
 /* Theme: Deep Clinical Indigo & Teal Glassmorphism */
 
 :root {
-  --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #1e1b4b 100%);
-  --card-bg: rgba(17, 24, 39, 0.6);
+  --bg-gradient: linear-gradient(135deg, #090d16 0%, #0f172a 50%, #1e1b4b 100%);
+  --card-bg: rgba(15, 23, 42, 0.45);
   --card-border: rgba(255, 255, 255, 0.08);
   --card-glow: rgba(99, 102, 241, 0.15);
   
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f8fafc;   /* Slate 50 */
+  --text-secondary: #94a3b8; /* Slate 400 */
+  --text-muted: #64748b;     /* Slate 500 */
   
   --accent-primary: #6366f1; /* Indigo */
-  --accent-cyan: #06b6d4;    /* Cyan */
-  --accent-emerald: #10b981; /* Emerald */
-  --accent-amber: #f59e0b;   /* Amber */
-  --accent-rose: #f43f5e;    /* Rose */
-  --accent-violet: #8b5cf6;  /* Violet */
+  --accent-cyan: #38bdf8;    /* Sky Blue */
+  --accent-cyan-light: #c7d2fe; /* Light Indigo for gradient */
+  --accent-emerald: #34d399; /* Emerald */
+  --accent-amber: #fbbf24;   /* Amber */
+  --accent-rose: #fb7185;    /* Rose */
+  --accent-violet: #a78bfa;  /* Violet */
   
   --font-family: 'Outfit', 'Sarabun', system-ui, -apple-system, sans-serif;
   --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -104,7 +105,7 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.5px;
-  background: linear-gradient(to right, #ffffff, #c7d2fe);
+  background: linear-gradient(to right, #ffffff, var(--accent-cyan-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -179,24 +180,30 @@ body {
 
 /* Glass Card Common */
 .glass-card {
-  background: var(--card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: rgba(17, 25, 40, 0.45);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--card-border);
   border-radius: 24px;
   padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
   transition: var(--transition-smooth);
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+  transform: translateY(-4px) scale(1.015);
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.45), 0 0 16px rgba(99, 102, 241, 0.2), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-card:active {
+  transform: translateY(-1px) scale(0.995);
+  transition: all 0.1s ease;
 }
 
 .card-header {
   margin-bottom: 1.25rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 0.75rem;
 }
 
@@ -460,14 +467,27 @@ body {
   transition: var(--transition-smooth);
 }
 
+.btn:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.97);
+  transition: all 0.1s ease;
+}
+
 .btn-secondary {
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .btn-secondary:hover {
   background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btn-sm {
@@ -521,8 +541,13 @@ body {
 .btn-arrow:hover {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+}
+
+.btn-arrow:active {
+  transform: translateY(-1px) scale(0.94);
+  transition: all 0.1s ease;
 }
 
 .calendar-grid-container {
@@ -539,7 +564,7 @@ body {
   font-weight: 600;
   color: var(--text-muted);
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .days-grid {
@@ -779,7 +804,7 @@ body {
 
 .shift-card-item {
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-left: 4px solid var(--accent-primary);
   border-radius: 12px;
   padding: 0.85rem 1rem;
@@ -790,9 +815,15 @@ body {
 }
 
 .shift-card-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px) scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.shift-card-item:active {
+  transform: translateX(2px) scale(0.98);
+  transition: all 0.1s ease;
 }
 
 .shift-info-meta {
@@ -941,7 +972,7 @@ body {
 
 .slot-card {
   background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.03);
   border-radius: 16px;
   padding: 1rem;
   display: flex;
@@ -1034,4 +1065,32 @@ body {
   .sidebar-left, .sidebar-right {
     grid-column: span 1;
   }
+}
+
+/* --- Theme Toggle Button Styling --- */
+.theme-toggle-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+  font-size: 1.25rem;
+}
+
+.theme-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(99, 102, 241, 0.35);
+  transform: translateY(-3px) scale(1.08);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.2);
+}
+
+.theme-toggle-btn:active {
+  transform: translateY(-1px) scale(0.94);
+  transition: all 0.1s ease;
 }

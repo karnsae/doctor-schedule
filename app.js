@@ -718,6 +718,11 @@ document.addEventListener("DOMContentLoaded", () => {
   simDatePicker.addEventListener("change", (e) => {
     if (e.target.value) {
       currentSimulatedDate = parseLocalDate(e.target.value);
+      
+      // Update calendar view to match the selected simulated date's month and year
+      activeMonth = currentSimulatedDate.getMonth();
+      activeYear = currentSimulatedDate.getFullYear();
+      
       renderCalendar();
       updateDoctorInfo();
       updateWardDoctors();
@@ -729,14 +734,37 @@ document.addEventListener("DOMContentLoaded", () => {
     simDatePicker.value = INITIAL_REAL_DATE;
     currentSimulatedDate = parseLocalDate(INITIAL_REAL_DATE);
     
-    // Reset calendar view to July 2026 to see the current mock date
-    activeMonth = 6;
-    activeYear = 2026;
+    // Reset calendar view to today's month and year
+    activeMonth = currentSimulatedDate.getMonth();
+    activeYear = currentSimulatedDate.getFullYear();
     
     renderCalendar();
     updateDoctorInfo();
     updateWardDoctors();
   });
+
+  // Helper to check if a doctor's rotation matches the selected rotation (handling compounds like อพ1+2)
+  function isRotationMatch(docRot, selectedRot) {
+    if (!docRot || !selectedRot) return false;
+    if (docRot === selectedRot) return true;
+    
+    // Check if docRot is a compound ward (e.g. "Ward: อพ1+2") and selectedRot is one of the components (e.g. "Ward: อพ1")
+    if (docRot.startsWith("Ward: ") && selectedRot.startsWith("Ward: ") && docRot.includes("+")) {
+      const docSuffix = docRot.slice(6);      // e.g. "อพ1+2"
+      const selSuffix = selectedRot.slice(6);  // e.g. "อพ1"
+      
+      const docMatch = docSuffix.match(/^([^\d]+)/);
+      const selMatch = selSuffix.match(/^([^\d]+)/);
+      
+      if (docMatch && selMatch && docMatch[1] === selMatch[1]) {
+        const wardName = docMatch[1]; // e.g. "อพ"
+        const docNumbers = docSuffix.slice(wardName.length).split("+").map(n => n.trim()); // e.g. ["1", "2"]
+        const selNumber = selSuffix.slice(wardName.length).trim(); // e.g. "1"
+        return docNumbers.includes(selNumber);
+      }
+    }
+    return false;
+  }
 
   // Collect and initialize all unique Wards and Units across all blocks
   function initWardsList() {
@@ -749,9 +777,31 @@ document.addEventListener("DOMContentLoaded", () => {
           if (rot) {
             // Exclude elective rotations containing PMK, RA, CMU, CU, TU from the dropdown
             const excludeKeywords = ["PMK", "RA", "CMU", "CU", "TU"];
-            const isElective = excludeKeywords.some(keyword => rot.includes(keyword));
+            const isElective = excludeKeywords.some(keyword => {
+              if (keyword === "CU" && rot.includes("ICU")) {
+                // Ignore "CU" matching if it is only part of "ICU"
+                const cleanRot = rot.replace("ICU", "");
+                return cleanRot.includes("CU");
+              }
+              return rot.includes(keyword);
+            });
+            
             if (!isElective) {
-              uniqueRotations.add(rot);
+              // Split compound wards (e.g. "Ward: อพ1+2" -> "Ward: อพ1" and "Ward: อพ2")
+              if (rot.startsWith("Ward: ") && rot.includes("+")) {
+                const prefix = "Ward: ";
+                const suffix = rot.slice(6); // e.g. "อพ1+2"
+                const match = suffix.match(/^([^\d]+)/);
+                if (match) {
+                  const wardName = match[1]; // e.g. "อพ"
+                  const numbers = suffix.slice(wardName.length).split("+"); // e.g. ["1", "2"]
+                  numbers.forEach(num => {
+                    uniqueRotations.add(prefix + wardName + num.trim());
+                  });
+                }
+              } else {
+                uniqueRotations.add(rot);
+              }
             }
           }
         });
@@ -817,7 +867,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const doctorsInWard = [];
     
     Object.keys(blockRotations).forEach(docName => {
-      if (blockRotations[docName] === selectedRot) {
+      const docRot = blockRotations[docName];
+      if (docRot === selectedRot || isRotationMatch(docRot, selectedRot)) {
         // Look up details from contact list
         const contact = window.RESIDENT_CONTACTS[docName] || {
           fullName: docName,
@@ -899,8 +950,51 @@ document.addEventListener("DOMContentLoaded", () => {
         renderCalendar();
         updateDoctorInfo();
       });
-      
       wardDoctorsContainer.appendChild(item);
+    });
+  }
+
+  // --- Font Accent Color Picker Logic ---
+  const colorThemes = {
+    "cyber-blue": { cyan: "#38bdf8", cyanLight: "#c7d2fe" },
+    "royal-blue": { cyan: "#60a5fa", cyanLight: "#dbeafe" },
+    "electric-indigo": { cyan: "#818cf8", cyanLight: "#e0e7ff" },
+    "neon-purple": { cyan: "#a78bfa", cyanLight: "#f3e8ff" },
+    "deep-violet": { cyan: "#c084fc", cyanLight: "#fae8ff" },
+    "hot-pink": { cyan: "#f472b6", cyanLight: "#fce7f3" },
+    "rose-pink": { cyan: "#fb7185", cyanLight: "#ffe4e6" },
+    "sunset-orange": { cyan: "#fb923c", cyanLight: "#ffedd5" },
+    "warm-amber": { cyan: "#fbbf24", cyanLight: "#fef3c7" },
+    "sunshine-yellow": { cyan: "#facc15", cyanLight: "#fef9c3" },
+    "lime-green": { cyan: "#a3e635", cyanLight: "#f0fdf4" },
+    "neon-mint": { cyan: "#4ade80", cyanLight: "#d1fae5" },
+    "emerald-green": { cyan: "#34d399", cyanLight: "#d1fae5" },
+    "teal-cyan": { cyan: "#2dd4bf", cyanLight: "#ccfbf1" },
+    "sky-cyan": { cyan: "#22d3ee", cyanLight: "#cffafe" },
+    "lilac-orchid": { cyan: "#e879f9", cyanLight: "#fdf4ff" },
+    "golden-coral": { cyan: "#fda4af", cyanLight: "#ffe4e6" },
+    "pastel-red": { cyan: "#f87171", cyanLight: "#fee2e2" },
+    "cool-gray": { cyan: "#cbd5e1", cyanLight: "#f1f5f9" },
+    "soft-ivory": { cyan: "#f8fafc", cyanLight: "#ffffff" }
+  };
+
+  const fontColorSelect = document.getElementById("font-color-select");
+  const savedColor = localStorage.getItem("font-color") || "cyber-blue";
+  
+  function applyFontColor(colorKey) {
+    const theme = colorThemes[colorKey] || colorThemes["cyber-blue"];
+    document.documentElement.style.setProperty('--accent-cyan', theme.cyan);
+    document.documentElement.style.setProperty('--accent-cyan-light', theme.cyanLight);
+  }
+
+  if (fontColorSelect) {
+    fontColorSelect.value = savedColor;
+    applyFontColor(savedColor);
+    
+    fontColorSelect.addEventListener("change", (e) => {
+      const val = e.target.value;
+      applyFontColor(val);
+      localStorage.setItem("font-color", val);
     });
   }
 

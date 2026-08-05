@@ -7,7 +7,7 @@
   <title>Doctor Duty Schedule Checker</title>
   
   <!-- CSS Stylesheet -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.5">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,8 +27,37 @@
         </div>
       </div>
       
-      <!-- Doctor Selector & Main Filter -->
-      <div class="header-actions">
+      <!-- Doctor Selector & Main Filter & Theme Toggle -->
+      <div class="header-actions" style="display: flex; gap: 1rem; align-items: center;">
+        <!-- Font Color Selector -->
+        <div class="filter-box">
+          <label for="font-color-select">สีเน้นข้อความ:</label>
+          <div class="custom-select-wrapper">
+            <select id="font-color-select" class="doctor-select-custom">
+              <option value="cyber-blue">🩵 Cyber Blue (ฟ้าไซเบอร์)</option>
+              <option value="royal-blue">💙 Royal Blue (น้ำเงินหลวง)</option>
+              <option value="electric-indigo">🌌 Electric Indigo (ครามแอลอีดี)</option>
+              <option value="neon-purple">💜 Neon Purple (ม่วงนีออน)</option>
+              <option value="deep-violet">😈 Deep Violet (ม่วงเข้ม)</option>
+              <option value="hot-pink">💗 Hot Pink (ชมพูสด)</option>
+              <option value="rose-pink">🩷 Rose Pink (ชมพูโรส)</option>
+              <option value="sunset-orange">🍊 Sunset Orange (ส้มพระอาทิตย์ตก)</option>
+              <option value="warm-amber">💛 Warm Amber (เหลืองแอมเบอร์)</option>
+              <option value="sunshine-yellow">🟡 Sunshine Yellow (เหลืองทอง)</option>
+              <option value="lime-green">🟢 Lime Green (เขียวมะนาว)</option>
+              <option value="neon-mint">🌱 Neon Mint (เขียวมิ้นต์)</option>
+              <option value="emerald-green">💚 Emerald Green (เขียวมรกต)</option>
+              <option value="teal-cyan">🧪 Teal Cyan (ฟ้าอมเขียว)</option>
+              <option value="sky-cyan">🌊 Sky Cyan (ฟ้าน้ำทะเล)</option>
+              <option value="lilac-orchid">🌸 Lilac Orchid (ม่วงกล้วยไม้)</option>
+              <option value="golden-coral">🪸 Golden Coral (ส้มคอรัล)</option>
+              <option value="pastel-red">❤️ Pastel Red (แดงพาสเทล)</option>
+              <option value="cool-gray">🩶 Cool Gray (เทาโมเดิร์น)</option>
+              <option value="soft-ivory">🤍 Soft Ivory (ขาวงาช้าง)</option>
+            </select>
+          </div>
+        </div>
+
         <div class="filter-box">
           <label for="doctor-select">เลือกแพทย์:</label>
           <div class="custom-select-wrapper">
@@ -205,6 +234,6 @@
 
   <!-- Scripts -->
   <script src="data.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
