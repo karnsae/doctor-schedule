@@ -586,6 +586,8 @@ body {
   cursor: pointer;
   position: relative;
   transition: var(--transition-smooth);
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .day-cell:hover {
@@ -653,6 +655,10 @@ body {
   border-radius: 4px;
   border: 1px solid rgba(245, 158, 11, 0.15);
   pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 18px);
 }
 
 /* Vacation Cell */
@@ -682,6 +688,10 @@ body {
   border-radius: 4px;
   border: 1px solid rgba(139, 92, 246, 0.15);
   pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(100% - 18px);
 }
 
 /* On duty Cell */
@@ -1222,27 +1232,78 @@ a[href^="tel:"]:active {
     min-height: 52px;
     padding: 0.2rem 0.1rem;
     border-radius: 8px;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .day-number {
     font-size: 0.75rem;
     margin-bottom: 0.1rem;
+    line-height: 1;
   }
 
   /* Micro Badges inside Day Cells for Mobile */
+  .shift-badge,
   .slot-badge {
-    font-size: 0.58rem;
-    padding: 0.08rem 0.2rem;
-    border-radius: 4px;
-    margin-bottom: 0.08rem;
+    font-size: 0.5rem;
+    padding: 1px 2px;
+    border-radius: 3px;
     line-height: 1.15;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
   }
 
-  .vacation-badge,
-  .holiday-badge {
-    font-size: 0.58rem;
-    padding: 0.08rem 0.2rem;
+  .vacation-label,
+  .holiday-label {
+    font-size: 0.5rem;
+    top: 2px;
+    right: 2px;
+    padding: 0px 2px;
+    border-radius: 3px;
+    line-height: 1.1;
+    max-width: calc(100% - 14px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+
+/* Compact Smartphones (iPhone SE / 12,13,14,15,16 Mini < 420px) */
+@media (max-width: 420px) {
+  .calendar-card {
+    padding: 0.75rem 0.35rem;
+  }
+
+  .days-grid {
+    gap: 3px;
+  }
+
+  .day-cell {
+    min-height: 46px;
+    padding: 0.15rem 0.05rem;
+  }
+
+  .day-number {
+    font-size: 0.7rem;
+  }
+
+  .holiday-label,
+  .vacation-label {
+    font-size: 0.45rem;
+    top: 1px;
+    right: 1px;
+    padding: 0 1px;
+    max-width: calc(100% - 12px);
+  }
+
+  .shift-badge {
+    font-size: 0.46rem;
+    padding: 0 1px;
+    letter-spacing: -0.5px;
+  }
+}
 
   /* Doctor Profile Card on Mobile */
   .profile-detail-item {
