@@ -1038,59 +1038,281 @@ body {
   }
 }
 
-/* Responsive States */
+/* ==========================================================================
+   Comprehensive Mobile Responsive & Smartphone UI Overhaul
+   ========================================================================== */
+
+/* Touch-friendly Base Enhancements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a[href^="tel:"] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 8px;
+  color: var(--accent-cyan);
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-smooth);
+}
+
+a[href^="tel:"]:active {
+  transform: scale(0.96);
+  background: rgba(99, 102, 241, 0.25);
+}
+
+/* Medium Screens (Tablets / Laptops < 1100px) */
 @media (max-width: 1100px) {
   .main-layout {
-    grid-template-columns: 300px 1fr;
+    grid-template-columns: 280px 1fr;
+    gap: 1.25rem;
   }
   .sidebar-right {
     grid-column: span 2;
   }
 }
 
+/* Small Screens & Tablets (< 768px) */
 @media (max-width: 768px) {
   .app-container {
-    padding: 1rem;
+    padding: 0.75rem 0.5rem;
+    max-width: 100%;
   }
+
   .app-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
   }
+
+  .brand-section {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .brand-section h1 {
+    font-size: 1.35rem;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .filter-box {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .doctor-select-custom {
     width: 100%;
+    min-height: 48px;
+    font-size: 0.95rem;
+    padding-left: 1rem;
   }
+
   .main-layout {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  .sidebar-left, .sidebar-right {
+
+  .sidebar-left,
+  .calendar-section,
+  .sidebar-right {
     grid-column: span 1;
+    width: 100%;
+  }
+
+  .stats-card,
+  .profile-card,
+  .calendar-card,
+  .upcoming-card,
+  .ward-card {
+    padding: 1rem;
+  }
+
+  .ward-doctors-container,
+  .timeline-container,
+  .modal-body {
+    -webkit-overflow-scrolling: touch;
   }
 }
 
-/* --- Theme Toggle Button Styling --- */
-.theme-toggle-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: var(--transition-smooth);
-  font-size: 1.25rem;
-}
+/* Smartphones (< 576px) */
+@media (max-width: 576px) {
+  .app-container {
+    padding: 0.5rem 0.25rem;
+  }
 
-.theme-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(99, 102, 241, 0.35);
-  transform: translateY(-3px) scale(1.08);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.2);
-}
+  .brand-section h1 {
+    font-size: 1.2rem;
+  }
 
-.theme-toggle-btn:active {
-  transform: translateY(-1px) scale(0.94);
-  transition: all 0.1s ease;
+  .brand-section .subtitle {
+    font-size: 0.78rem;
+  }
+
+  /* Stats Grid on Mobile */
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+
+  .stat-item {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-value {
+    font-size: 1.1rem;
+  }
+
+  .stat-value.highlight {
+    font-size: 0.9rem;
+  }
+
+  .stat-sub {
+    font-size: 0.7rem;
+  }
+
+  /* Calendar Section on Smartphones */
+  .calendar-header {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .calendar-title-group {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .calendar-title-group h2 {
+    font-size: 1.15rem;
+  }
+
+  .nav-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+  }
+
+  .weekdays-grid {
+    font-size: 0.72rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .days-grid {
+    gap: 0.2rem;
+  }
+
+  .day-cell {
+    min-height: 52px;
+    padding: 0.2rem 0.1rem;
+    border-radius: 8px;
+  }
+
+  .day-number {
+    font-size: 0.75rem;
+    margin-bottom: 0.1rem;
+  }
+
+  /* Micro Badges inside Day Cells for Mobile */
+  .slot-badge {
+    font-size: 0.58rem;
+    padding: 0.08rem 0.2rem;
+    border-radius: 4px;
+    margin-bottom: 0.08rem;
+    line-height: 1.15;
+  }
+
+  .vacation-badge,
+  .holiday-badge {
+    font-size: 0.58rem;
+    padding: 0.08rem 0.2rem;
+  }
+
+  /* Doctor Profile Card on Mobile */
+  .profile-detail-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .profile-detail-label {
+    font-size: 0.78rem;
+  }
+
+  .profile-detail-value {
+    font-size: 0.9rem;
+  }
+
+  /* Timeline & Ward List on Mobile */
+  .shift-card-item {
+    padding: 0.75rem;
+  }
+
+  .shift-time {
+    font-size: 0.82rem;
+  }
+
+  .shift-duty-name {
+    font-size: 0.9rem;
+  }
+
+  .ward-doctor-item {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .ward-doctor-name {
+    font-size: 0.9rem;
+  }
+
+  /* Modal Popup on Mobile */
+  .modal-container {
+    width: 94vw;
+    max-width: 94vw;
+    padding: 1rem 0.85rem;
+    border-radius: 20px;
+    max-height: 88vh;
+  }
+
+  .modal-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .modal-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+  }
+
+  .modal-body {
+    max-height: calc(88vh - 65px);
+  }
+
+  .slot-card {
+    padding: 0.75rem;
+  }
+
+  .slot-title {
+    font-size: 0.85rem;
+  }
+
+  .doctor-badge-on-duty {
+    font-size: 0.82rem;
+    padding: 0.25rem 0.6rem;
+  }
 }
